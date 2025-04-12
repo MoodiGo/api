@@ -1,15 +1,26 @@
 import { Router } from 'express';
-import { verifyUserToken } from '../middlewares/verifyUserToken';
-// import { getProfile } from '../controllers/auth';
+import { UserController } from '../controllers/UserController';
 
 
-export const protectedRouter = Router();
-protectedRouter.use(verifyUserToken);
 
-// GET - user profile
-protectedRouter.get('/user', () => console.log("User profile route"));
+export const initProtectedRouter = () : Router => {
+    const router = Router();
 
-// GET - user favorites
-// POST - user favorites
-// DELETE - user favorites
+    // TODO - descomentar essa linha e verificar se o token é valido
+    // router.use(verifyUserToken);
 
+    
+    // GET - user profile
+    router.use('/user', (req, res) => new UserController().getUserProfile(req, res));
+
+    // POST - create profile
+    router.use('/user', (req, res) => new UserController().createUserProfile(req, res));    
+
+    // GET - user favorites
+    // POST - user favorites
+    // DELETE - user favorites
+
+
+
+    return router;
+}

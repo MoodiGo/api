@@ -136,3 +136,5 @@ dist
 .pnp.*
 
 moodigo-app-firebase-adminsdk.json
+
+**/*.js

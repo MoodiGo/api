@@ -1,5 +1,9 @@
-declare namespace Express {
-    export interface Request  {
-        user?: { uid: string };
+import { DecodedIdToken } from "firebase-admin/auth";
+
+declare global {
+    namespace Express {
+      interface Request {
+        user?: DecodedIdToken;
+      }
     }
-}
+  }

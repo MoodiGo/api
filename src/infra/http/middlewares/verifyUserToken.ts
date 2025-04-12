@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { authService } from '../../../../di';
-
+import { authService } from '../../../di';
 export const verifyUserToken = async (
   req: Request,
   res: Response,
@@ -14,7 +13,7 @@ export const verifyUserToken = async (
 
   try {
     const decoded = await authService.validateToken(token);
-    req.user = { uid: decoded.uid }; // Pode acessar em rotas autenticadas
+    req.user = decoded; // Pode acessar em rotas autenticadas
     next();
   } catch (err) {
     res.status(401).send({ error: 'Invalid token' });

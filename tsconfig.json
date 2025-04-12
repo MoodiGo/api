@@ -1,5 +1,17 @@
 {
     "compilerOptions": {
-        "typeRoots": ["./node_modules/@types", "./src/shared/types"]
-    }
-}
+      "outDir": "dist",                        // <-- ESSENCIAL
+      "rootDir": ".",                        // <-- define onde estão seus .ts
+      "module": "commonjs",
+      "target": "es2017",
+      "moduleResolution": "node",
+      "lib": ["es2017"],
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "allowSyntheticDefaultImports": true,
+      "skipLibCheck": true,
+      "strict": true
+    },
+    "include": ["src/**/*", "index.ts", "types/env.d.ts"],
+    "exclude": ["node_modules", "dist"]
+  }
