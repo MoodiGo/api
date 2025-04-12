@@ -5,10 +5,10 @@ import { QueryResult } from "@supabase/supabase-js";
 import { User } from "../../../domain/entities/User";
 
 export interface ISQLClient {
-  queryAll<T>(table: string, where?: string, params?: any[]): Promise<T[]>;
+  queryAll<T>(table: string, where?: string[], params?: any[]): Promise<T[]>;
   queryOne<T>(table: string, where?: string, params?: any[]): Promise<T | null>;
   insert<T extends Record<string, any>>(table: string, data: T): Promise<T|null>;
-  update<T extends Record<string, any>, I>(table: string, data: T, where: string, params: any[]): Promise<I|null>;
+  update<T extends Record<string, any>, I>(table: string, data: T, where: string[], params: any[]): Promise<I|null>;
   delete(table: string, where: string, params: any[]): Promise<number>;
 }
 
@@ -19,12 +19,23 @@ export class SQLClient implements ISQLClient {
     this.client = getDb();
   }
 
-  async queryAll<T>(table: string, where?: string, params?: any[]): Promise<T[]> {
+  async queryAll<T>(table: string, where?: string[], params?: any[]): Promise<T[]> {
     try {
       let query = `SELECT * FROM ${table}`;
-      if (where && params?.length) {
-        query += ` WHERE ${where} = $1`;
+      if (where && params) {
+        if(where.length !== params.length) {
+          throw new Error("Where and params length mismatch");
+        }
+
+        if(where.length === 1) {
+          query += ` WHERE ${where[0]} = $1`;
+        }
+
+        if(where.length > 1) {
+          query += ` WHERE ${where.map((w, i) => `${w} = $${i + 1}`).join(" AND ")}`;
+        }
       }
+
 
       const result = await this.client.query(query, params || []);
       return result.rows as T[];
@@ -63,12 +74,15 @@ export class SQLClient implements ISQLClient {
     }
   }
 
-  async update<T extends Record<string, any>, I>(table: string, data: T, where: string, params: any[]): Promise<I|null> {
+  async update<T extends Record<string, any>, I>(table: string, data: T, where: string[], params: any[]): Promise<I|null> {
     try {
       const keys = Object.keys(data);
       const values = Object.values(data);
       const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
-      const query = `UPDATE ${table} SET ${setClause} WHERE ${where} = $${values.length + 1} RETURNING *`;
+      // const query = `UPDATE ${table} SET ${setClause} WHERE ${where} = $${values.length + 1} RETURNING *`;
+
+      const query = `UPDATE ${table} SET ${setClause} WHERE ${where.map((w, i) => `${w} = $${i + values.length + 1}`).join(" AND ")} RETURNING *`;
+
       return (await this.client.query(query, [...values, ...params])).rows[0] as I ?? null;
     } catch (error: any) {
       throw new DatabaseUpdateError(`Update: ${table} - Error: ${error.message}`);

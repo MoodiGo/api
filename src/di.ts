@@ -3,6 +3,7 @@ import { SQLClient } from "./application/services/database/SQLClient";
 import { AuthService } from "./application/services/auth";
 import { initDb } from "./infra/supabase";
 import { UserLifestyleRepository } from "./domain/repositories/UserLifestyleRepository";
+import { UserWeatherRepository } from "./domain/repositories/UserWeatherRepository";
 
 initDb();
 
@@ -14,5 +15,5 @@ export const authService = new AuthService();
 // REPOSITORIES -------------------------------------------------------
 export const userRepository = new UserRepository(sqlClient);
 export const userLifestyleRepository = new UserLifestyleRepository(sqlClient);
-
+export const userWeatherRepository = new UserWeatherRepository(sqlClient);
 

@@ -54,7 +54,7 @@ export class UserLifestyleRepository implements IUserLifestyleRepository {
      */
     get = async (user_id: string): Promise<SelectUserLifestyle | null> => {
         const params = [user_id];
-        const result = await this.dbClient.queryAll(this.tableName, "user_id", params);
+        const result = await this.dbClient.queryAll(this.tableName, ["user_id"], params);
         if (result.length === 0) {
             return null;
         }
@@ -72,7 +72,7 @@ export class UserLifestyleRepository implements IUserLifestyleRepository {
         try {
             const params = [user.id];
 
-            const resultLS = await this.dbClient.queryAll(this.tableName, "user_id" , params);
+            const resultLS = await this.dbClient.queryAll(this.tableName, ["user_id"] , params);
 
             if (resultLS.length > 0) {
                 throw new UserLifestyleAlreadyExistsError();
@@ -205,7 +205,7 @@ export class UserLifestyleRepository implements IUserLifestyleRepository {
 
             const params = [user.id];
 
-            const result = await this.dbClient.update<UpdateUserLifestyle, SelectUserLifestyle>(this.tableName, updateData, "user_id", params);
+            const result = await this.dbClient.update<UpdateUserLifestyle, SelectUserLifestyle>(this.tableName, updateData, ["user_id"], params);
 
             if (!result) {
                 throw new Error("Error updating user lifestyle");

@@ -91,7 +91,7 @@ export class UserRepository implements IUserRepository {
 
             if (data.lastLoginAt) { updateData.last_login_at = data.lastLoginAt; }
 
-            const queryResponse = await this.dbClient.update<UpdateUser, SelectUser>(this.tableName, updateData, "firebase_uid", [firebase_uid]);
+            const queryResponse = await this.dbClient.update<UpdateUser, SelectUser>(this.tableName, updateData, ["firebase_uid"], [firebase_uid]);
 
             if (queryResponse) {
                 return queryResponse;
