@@ -1,12 +1,9 @@
-export interface IPostRequestBody<T> {
-   
-}
 export abstract class PostRequestBody<T> {
-    fromJson(json: any): T {
+    static fromJson(json: any): PostRequestBody<any> {
         throw new Error("Method not implemented.");
     }
 
-    getSchema(): IPostRequestBodySchema{
+    static getSchema(): IPostRequestBodySchema {
         throw new Error("Method not implemented.");
     }
 }

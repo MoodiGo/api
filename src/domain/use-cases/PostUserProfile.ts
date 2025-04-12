@@ -1,6 +1,6 @@
 import { DecodedIdToken } from "firebase-admin/auth";
-import { IPostRequestBody } from "./models/PostRequestBody";
 import { SelectUser, SelectUserLifestyle } from "../../shared/types/db_types";
+import { PostRequestBody } from "./models/PostRequestBody";
 
 interface IPostUserProfileRequest {
     name: string;
@@ -12,7 +12,7 @@ interface IPostUserProfileRequest {
 }
 
 
-export class PostUserProfileRequest implements IPostRequestBody<IPostUserProfileRequest> {
+export class PostUserProfileRequest implements PostRequestBody<IPostUserProfileRequest> {
     constructor(
         public readonly name : string,
         public readonly lastName : string,
