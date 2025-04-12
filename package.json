@@ -19,12 +19,14 @@
   "description": "",
   "devDependencies": {
     "@types/express": "^5.0.1",
+    "@types/pg": "^8.11.12",
     "express": "^5.1.0",
     "firebase-admin": "^13.2.0",
     "typescript": "^5.8.3"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "pg": "^8.14.1"
   }
 }

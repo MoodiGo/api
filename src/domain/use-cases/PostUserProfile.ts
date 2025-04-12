@@ -21,6 +21,21 @@ export class PostUserProfileRequest {
             json.contactAccepted
         );
     }
+
+    static getSchema() {
+        return {
+            type: "object",
+            properties: {
+                name: { type: "string" },
+                lastName: { type: "string" },
+                birthDate: { type: "string" },
+                isPremium: { type: "boolean" },
+                termsAccepted: { type: "boolean" },
+                contactAccepted: { type: "boolean" },
+            },
+            required: ["name", "lastName", "birthDate", "isPremium", "termsAccepted", "contactAccepted"],
+        };
+    }
 }
 
 export class FirebaseUserData {

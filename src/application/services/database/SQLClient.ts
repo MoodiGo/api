@@ -1,80 +1,61 @@
-import { PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase-js";
+import { Pool } from "pg";
+import { getDb } from "../../../infra/supabase";
 import { DatabaseInsertError, DatabaseQueryError } from "../../../shared/errors/database";
-import { getSupabase } from "../../../infra/supabase";
 
 export interface ISQLClient {
-    queryAll<T> (table: string, where?: string, params?: any[]): Promise<T[]>;
-    queryOne<T>(table: string, where?: string, params?: any[]): Promise<T | null>;
-}   
+  queryAll<T>(table: string, where?: string, params?: any[]): Promise<T[]>;
+  queryOne<T>(table: string, where?: string, params?: any[]): Promise<T | null>;
+  insert<T extends Record<string, any>>(table: string, data: T): Promise<T>;
+}
 
 export class SQLClient implements ISQLClient {
-    private client: SupabaseClient;
+  private client: Pool;
 
-    constructor() {
-        this.client = getSupabase();
+  constructor() {
+    this.client = getDb();
+  }
+
+  async queryAll<T>(table: string, where?: string, params?: any[]): Promise<T[]> {
+    try {
+      let query = `SELECT * FROM ${table}`;
+      if (where && params?.length) {
+        query += ` WHERE ${where} = $1`;
+      }
+
+      const result = await this.client.query(query, params || []);
+      return result.rows as T[];
+    } catch (error: any) {
+      throw new DatabaseQueryError(`Query: ${table} - Error: ${error.message}`);
     }
+  }
 
-    async queryOne<T>(table: string, where?: string, params?: any[]): Promise<T | null> {
-        let res = {} as any;
+  async queryOne<T>(table: string, where?: string, params?: any[]): Promise<T | null> {
+    try {
+      let query = `SELECT * FROM ${table}`;
+      if (where && params?.length) {
+        query += ` WHERE ${where} = $1`;
+      }
+      query += " LIMIT 1";
 
-        try{
-            if(where && params) {
-                res = await this.client.from(table).select("*").eq(where, params[0]);
-            }else{
-                res = await this.client.from(table).select("*");
-            }   
-
-            if(res.error) {
-                throw new Error(res.error.message);
-            }
-
-            if(res.data.length === 0) {
-                return null;
-            }
-            
-            return res.data[0] as T;
-
-        }catch (error : any) {
-            throw new DatabaseQueryError(`Query: ${table} - Error: ${error.message}`);
-        }
+      const result = await this.client.query(query, params || []);
+      return result.rows[0] ?? null;
+    } catch (error: any) {
+      throw new DatabaseQueryError(`Query: ${table} - Error: ${error.message}`);
     }
+  }
 
-    async queryAll<T>(table: string, where?: string, params?: any[]): Promise<T[]> {
-        let res = {} as any;
+  async insert<T extends Record<string, any>>(table: string, data: T): Promise<T> {
+    try {
+      const keys = Object.keys(data);
+      const values = Object.values(data);
+      const placeholders = keys.map((_, i) => `$${i + 1}`).join(", ");
 
-        try{
-            if(where && params) {
-                res = await this.client.from(table).select("*").eq(where, params[0]);
-            }else{
-                res = await this.client.from(table).select("*");
-            }   
+      const query = `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${placeholders}) RETURNING *`;
 
-            if(res.error) {
-                throw new Error(res.error.message);
-            }
-            
-            return res.data as T[];
-
-        }catch (error : any) {
-            throw new DatabaseQueryError(`Query: ${table} - Error: ${error.message}`);
-        }
+      const result = await this.client.query(query, values);
+      return result.rows[0] as T;
+    } catch (error: any) {
+      throw new DatabaseInsertError(`Insert: ${table} - Error: ${error.message}`);
     }
-
-    async insert<T>(table: string, data: T): Promise<T> {
-        try{
-            const res = await this.client.from(table).insert(data);
-
-            if(res.error) {
-                throw new Error(res.error.message);
-            }
-
-            if (res.data === null) {
-                throw new DatabaseInsertError(`Insert: ${table} - Error: Insert operation returned null data.`);
-            }
-
-            return (res as PostgrestSingleResponse<T>).data as T;
-        }catch (error : any) {
-            throw new DatabaseInsertError(`Insert: ${table} - Error: ${error.message}`);
-        }
-    }
+  }
 }

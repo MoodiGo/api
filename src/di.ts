@@ -1,9 +1,10 @@
 import { UserRepository } from "./domain/repositories/UserRepository";
 import { SQLClient } from "./application/services/database/SQLClient";
 import { AuthService } from "./application/services/auth";
-import { initSupabase } from "./infra/supabase";
+import { initDb } from "./infra/supabase";
 
-initSupabase();   
+
+initDb();
 
 const sqlClient = new SQLClient();
 

@@ -19,7 +19,6 @@ export class UserRepository implements IUserRepository {
     }
 
     getUserProfile = async (uid: string): Promise<GetUserProfileResponse> => {
-        const query = `SELECT * FROM ${this.tableName} WHERE firebase_uid = ?`;
         const params = [uid];
         const result = await this.dbClient.queryOne<User>(this.tableName, "firebase_uid", params);
         
@@ -57,9 +56,6 @@ export class UserRepository implements IUserRepository {
 
             // Insert new user profile
             await this.dbClient.insert<InsertUser>(this.tableName, dataToInsert);
-
-
-            // Operation completed successfully
         } catch (error) {
             if(error instanceof UserAlreadyExistsError) {
                 throw error;

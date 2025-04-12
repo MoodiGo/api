@@ -1,20 +1,24 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Pool } from 'pg';
 
+let pool: Pool | null = null;
 
-export let supabase : SupabaseClient|null = null;
+export const initDb = () => {
+  if (pool) return; // prevent reinitialization
 
-export const initSupabase = () : void => {
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const connectionString = process.env.DATABASE_CONN_STRING;
+  if (!connectionString) {
+    throw new Error("Missing DATABASE_CONN_STRING env var");
+  }
 
-    const sb = createClient(supabaseUrl, supabaseKey);
+  pool = new Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: false }, // required for Supabase
+  });
+};
 
-    supabase = sb;
-}
-
-export const getSupabase = () : SupabaseClient => {
-    if(!supabase) {
-        throw new Error("Supabase not initialized.");
-    }
-    return supabase;
-}
+export const getDb = (): Pool => {
+  if (!pool) {
+    throw new Error("Database not initialized. Call initDb() first.");
+  }
+  return pool;
+};

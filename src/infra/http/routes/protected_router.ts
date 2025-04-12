@@ -11,10 +11,10 @@ export const initProtectedRouter = () : Router => {
 
     
     // GET - user profile
-    router.use('/user', (req, res) => new UserController().getUserProfile(req, res));
+    router.get('/user', (req, res) => new UserController().getUserProfile(req, res));
 
     // POST - create profile
-    router.use('/user', (req, res) => new UserController().createUserProfile(req, res));    
+    router.post('/user', (req, res) => new UserController().createUserProfile(req, res));    
 
     // GET - user favorites
     // POST - user favorites

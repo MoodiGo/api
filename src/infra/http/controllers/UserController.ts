@@ -46,15 +46,9 @@ export class UserController {
 
         // TODO - substituir pelo uid do token
         if(req.body == null || req.body == undefined || !(req.body instanceof PostUserProfileRequest)){
-            return res.status(406).send({"message": 
-                `Body should be: {
-                    name: string,
-                    lastName: string,
-                    birthDate: string,
-                    isPremium: boolean,
-                    termsAccepted: boolean,
-                    contactAccepted: boolean
-                }`
+            return res.status(406).send({
+                message: "Invalid request body. Expected structure:",
+                expected: PostUserProfileRequest.getSchema(),
             });
         }
 
