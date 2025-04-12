@@ -1,6 +1,18 @@
 import { DecodedIdToken } from "firebase-admin/auth";
+import { IPostRequestBody } from "./models/PostRequestBody";
+import { SelectUser, SelectUserLifestyle } from "../../shared/types/db_types";
 
-export class PostUserProfileRequest {
+interface IPostUserProfileRequest {
+    name: string;
+    lastName: string;
+    birthDate: string;
+    isPremium: boolean;
+    termsAccepted: boolean;
+    contactAccepted: boolean;
+}
+
+
+export class PostUserProfileRequest implements IPostRequestBody<IPostUserProfileRequest> {
     constructor(
         public readonly name : string,
         public readonly lastName : string,
@@ -10,8 +22,7 @@ export class PostUserProfileRequest {
         public readonly contactAccepted : boolean,
     ) {}
 
-    // from json
-    static fromJson(json: any): PostUserProfileRequest {
+    static fromJson(json: IPostUserProfileRequest): PostUserProfileRequest {
         return new PostUserProfileRequest(
             json.name,
             json.lastName,
@@ -37,6 +48,12 @@ export class PostUserProfileRequest {
         };
     }
 }
+
+export interface PostUserProfileResponse {
+    user: SelectUser;
+    lifestyle: SelectUserLifestyle;
+}
+    
 
 export class FirebaseUserData {
     firebase_uid: string;

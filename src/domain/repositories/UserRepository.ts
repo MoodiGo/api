@@ -1,12 +1,15 @@
 import { SQLClient } from "../../application/services/database/SQLClient";
 import { UserAlreadyExistsError } from "../../shared/errors/user";
+import { UserLifestyleAlreadyExistsError } from "../../shared/errors/user_lifestyle";
+import { InsertUser, InsertUserLifestyle, SelectUser, SelectUserLifestyle } from "../../shared/types/db_types";
 import { Database } from "../../shared/types/supabase";
 import { User } from "../entities/User";
 import { GetUserProfileResponse } from "../use-cases/GetUserProfile";
 import { FirebaseUserData, PostUserProfileRequest } from "../use-cases/PostUserProfile";
 
 export interface IUserRepository {
-    getUserProfile(uid: string): Promise<GetUserProfileResponse>;
+    get(uid: string): Promise<GetUserProfileResponse>;
+    create(data: PostUserProfileRequest, firebaseData: FirebaseUserData): Promise<SelectUser>;
 }
 
 export class UserRepository implements IUserRepository {
@@ -18,7 +21,7 @@ export class UserRepository implements IUserRepository {
         this.dbClient = dbClient;
     }
 
-    getUserProfile = async (uid: string): Promise<GetUserProfileResponse> => {
+    get = async (uid: string): Promise<GetUserProfileResponse> => {
         const params = [uid];
         const result = await this.dbClient.queryOne<User>(this.tableName, "firebase_uid", params);
         
@@ -33,8 +36,16 @@ export class UserRepository implements IUserRepository {
         } as unknown as GetUserProfileResponse;
     }
 
-    createUserProfile = async (data: PostUserProfileRequest, firebaseData: FirebaseUserData): Promise<void> => {
+    create = async (data: PostUserProfileRequest, firebaseData: FirebaseUserData): Promise<SelectUser> => {
         try {
+            // Check if user already exists
+            const existingUser = await this.get(firebaseData.firebase_uid);
+
+            if (existingUser.data) {
+                throw new UserAlreadyExistsError();
+            }
+
+            
             const dataToInsert = {
                 name: data.name,
                 last_name: data.lastName,
@@ -47,15 +58,9 @@ export class UserRepository implements IUserRepository {
                 firebase_uid: firebaseData.firebase_uid,
             } as InsertUser;
 
-            // Check if user already exists
-            const existingUser = await this.getUserProfile(firebaseData.firebase_uid);
-
-            if (existingUser.data) {
-                throw new UserAlreadyExistsError("User already exists");
-            }
 
             // Insert new user profile
-            await this.dbClient.insert<InsertUser>(this.tableName, dataToInsert);
+            return await this.dbClient.insert<InsertUser, SelectUser>(this.tableName, dataToInsert);
         } catch (error) {
             if(error instanceof UserAlreadyExistsError) {
                 throw error;
@@ -65,8 +70,3 @@ export class UserRepository implements IUserRepository {
         }
     }
 }
-
-export type InsertUser = Database['public']['Tables']['users']['Insert'];
-export type UpdateUser = Database['public']['Tables']['users']['Update'];
-export type SelectUser = Database['public']['Tables']['users']['Row'];
-export type RelationshipsUser = Database['public']['Tables']['users']['Relationships'];

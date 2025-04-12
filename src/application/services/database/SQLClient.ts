@@ -44,7 +44,7 @@ export class SQLClient implements ISQLClient {
     }
   }
 
-  async insert<T extends Record<string, any>>(table: string, data: T): Promise<T> {
+  async insert<T extends Record<string, any>, I>(table: string, data: T): Promise<I> {
     try {
       const keys = Object.keys(data);
       const values = Object.values(data);
@@ -53,7 +53,7 @@ export class SQLClient implements ISQLClient {
       const query = `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${placeholders}) RETURNING *`;
 
       const result = await this.client.query(query, values);
-      return result.rows[0] as T;
+      return result.rows[0] as I;
     } catch (error: any) {
       throw new DatabaseInsertError(`Insert: ${table} - Error: ${error.message}`);
     }

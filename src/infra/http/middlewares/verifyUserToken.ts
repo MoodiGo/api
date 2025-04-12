@@ -14,6 +14,7 @@ export const verifyUserToken = async (
   try {
     const decoded = await authService.validateToken(token);
     req.user = decoded; // Pode acessar em rotas autenticadas
+    
     next();
   } catch (err) {
     res.status(401).send({ error: 'Invalid token' });
