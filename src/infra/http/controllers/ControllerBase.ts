@@ -18,7 +18,7 @@ export abstract class ControllerBase {
         if(error instanceof BaseError) {
             return res.status(error.code).send({"message": error.message});
         }
-        return res.status(500).send({"message": defaultMessage, error: error});
+        return res.status(500).send({"message": defaultMessage, error: (error instanceof Error) ? error.message : undefined});
     }
 
     sendErrorInvalidBody(res: Response, expectedBodySchema: IRequestBodySchema) {
