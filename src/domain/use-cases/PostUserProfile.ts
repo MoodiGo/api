@@ -5,7 +5,7 @@ import { PostRequestBody } from "./models/PostRequestBody";
 interface IPostUserProfileRequest {
     name: string;
     lastName: string;
-    birthDate: string;
+    birthdate: string;
     isPremium: boolean;
     termsAccepted: boolean;
     contactAccepted: boolean;
@@ -16,7 +16,7 @@ export class PostUserProfileRequest implements PostRequestBody<IPostUserProfileR
     constructor(
         public readonly name : string,
         public readonly lastName : string,
-        public readonly birthDate : string,
+        public readonly birthdate : string,
         public readonly isPremium : boolean,
         public readonly termsAccepted : boolean,
         public readonly contactAccepted : boolean,
@@ -26,7 +26,7 @@ export class PostUserProfileRequest implements PostRequestBody<IPostUserProfileR
         return new PostUserProfileRequest(
             json.name,
             json.lastName,
-            json.birthDate,
+            json.birthdate,
             json.isPremium,
             json.termsAccepted,
             json.contactAccepted
@@ -39,7 +39,7 @@ export class PostUserProfileRequest implements PostRequestBody<IPostUserProfileR
             properties: {
                 name: { type: "string" },
                 lastName: { type: "string" },
-                birthDate: { type: "string" },
+                birthdate: { type: "string" },
                 isPremium: { type: "boolean" },
                 termsAccepted: { type: "boolean" },
                 contactAccepted: { type: "boolean" },

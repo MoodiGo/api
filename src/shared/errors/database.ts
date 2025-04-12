@@ -18,3 +18,10 @@ export class DatabaseUpdateError extends Error {
     this.name = 'DatabaseUpdateError';
   }
 }
+
+export class DatabaseDeleteError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DatabaseDeleteError';
+  }
+}

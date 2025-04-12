@@ -6,6 +6,7 @@ export interface IUserLifestyleRepository {
     // get(uid: string): Promise<GetUserLifestyleResponse>;
     create(user: SelectUser): Promise<SelectUserLifestyle>;
     // update(data: PutUserLifestyleRequest, uid: string): Promise<SelectUserLifestyle>;
+    delete(uid: string): Promise<void>;
 }
 
 export class UserLifestyleRepository implements IUserLifestyleRepository {
@@ -19,10 +20,11 @@ export class UserLifestyleRepository implements IUserLifestyleRepository {
     
     create = async (user: SelectUser): Promise<SelectUserLifestyle> => {
         try {
-            // check if row with user_id exists in table user_lifestyles
             const params = [user.id];
+
             const resultLS = await this.dbClient.queryAll(this.tableName, "user_id" , params);
-            if (resultLS) {
+
+            if (resultLS.length > 0) {
                 throw new UserLifestyleAlreadyExistsError();
             }
 
@@ -57,12 +59,24 @@ export class UserLifestyleRepository implements IUserLifestyleRepository {
             } as InsertUserLifestyle;
 
 
-            return await this.dbClient.insert<InsertUserLifestyle, SelectUserLifestyle>(this.tableName, dataToInsert);
+            const insertedRow = await this.dbClient.insert<InsertUserLifestyle, SelectUserLifestyle>(this.tableName, dataToInsert);
+            if (!insertedRow) {
+                throw new Error("Failed to insert user lifestyle");
+            }
+            return insertedRow;
         } catch (error) {
             if(error instanceof UserLifestyleAlreadyExistsError) {
                 throw error;
             }
             throw new Error("Error creating user lifestyle");
+        }
+    }
+
+    delete = async (userId: string): Promise<void> => {
+        const params = [userId];
+        const result = await this.dbClient.delete(this.tableName, "user_id", params);
+        if (!result) {
+            throw new Error("Error deleting user lifestyle");
         }
     }
 }

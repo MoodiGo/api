@@ -1,7 +1,7 @@
 import { userLifestyleRepository, userRepository } from "../../../di";
 import { UserRepository } from "../../../domain/repositories/UserRepository";
 import { FirebaseUserData, PostUserProfileRequest, PostUserProfileResponse } from "../../../domain/use-cases/PostUserProfile";
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { UserLifestyleRepository } from "../../../domain/repositories/UserLifestyleRepository";
 import { PutUserProfileRequest, PutUserProfileResponse } from "../../../domain/use-cases/PutUserProfile";
 import { ControllerBase } from "./ControllerBase";
@@ -16,30 +16,28 @@ export class UserController extends ControllerBase {
         this.userLSRepository = userLifestyleRepository;
     }
 
-    async getUserProfile(req: any, res: any) {
-        // TODO - VERIFICAR SE REALMENTE PRECISA 
-        // const uid = req.user?.uid;
-
-        // TODO - descomentar essa linha e verificar se o uid existe
-        // if (!uid) {
-        //     return res.status(401).send({"message": "Unauthorized"});
-        // }
-
-        // TODO - substituir pelo uid do token
-        this.userRepository.get("9813jhsalknd219paskd").then((result) => {
-            if (result.data) {
-                return this.send(res, 200, "User found", result.data);
-            }   
-            else {
-                return this.send(res, 404, "User not found");
+    async getUserProfile(req: Request, res: Response) {
+        try {
+            if(!req.user || !req.user.uid) return this.sendError(res, new Error(), "Could not set uid from token");
+            
+            return this.userRepository.get(req.user.uid).then((result) => {
+                if (result.data) {
+                    return this.send(res, 200, "User found", result.data);
+                }   
+                else {
+                    return this.send(res, 404, "User not found");
+                }
             }
+            ).catch((err : any) => {
+                return this.send(res, 500, "Internal server error", err);
+            });
+        } catch (error) {
+            return this.sendError(res, error, "Error getting user profile");
         }
-        ).catch((err : any) => {
-            return this.send(res, 500, "Internal server error", err);
-        });
+        
     }
 
-    async createUserProfile(req: Request, res: any) {
+    async createUserProfile(req: Request, res: Response) {
         try {
             if(!this.validateBodyPresence(req.body) || !PostUserProfileRequest.validate(req.body)){
                 return this.sendErrorInvalidBody(res, PostUserProfileRequest.getSchema());

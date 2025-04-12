@@ -6,3 +6,10 @@ export class UserAlreadyExistsError extends BaseError {
     this.name = 'UserAlreadyExistsError';
   }
 }
+
+export class UserDoesNotExistError extends BaseError {
+  constructor() {
+    super('User does not exist', 404);
+    this.name = 'UserDoesNotExistError';
+  }
+}
