@@ -68,8 +68,7 @@ export class SQLClient implements ISQLClient {
       const keys = Object.keys(data);
       const values = Object.values(data);
       const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
-      const query = `UPDATE ${table} SET ${setClause} WHERE ${where}`;
-
+      const query = `UPDATE ${table} SET ${setClause} WHERE ${where} = $${values.length + 1} RETURNING *`;
       return (await this.client.query(query, [...values, ...params])).rows[0] as I ?? null;
     } catch (error: any) {
       throw new DatabaseUpdateError(`Update: ${table} - Error: ${error.message}`);

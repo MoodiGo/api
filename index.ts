@@ -16,8 +16,11 @@ const router = initRouter();
 // loading firebase
 initializeFirebase(); 
 
-
 app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+
+
 app.use('/api', router);
 
 const PORT = process.env.PORT || 3000;

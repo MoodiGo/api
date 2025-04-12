@@ -74,4 +74,17 @@ export class UserController extends ControllerBase {
             return this.sendError(res, error, "Error updating user profile");
         }
     }
+
+    async deleteUserProfile(req: Request, res: Response) {
+        try {
+            if(!req.user || !req.user.uid) return this.sendError(res, new Error(), "Could not set uid from token");
+
+            await this.userRepository.delete(req.user.uid);
+
+            return res.status(204).send({"message": "User deleted"});
+        } catch (error) {
+            console.log(error);
+            return this.sendError(res, error, "Error deleting user profile");
+        }
+    }
 }

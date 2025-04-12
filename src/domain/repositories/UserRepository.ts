@@ -62,8 +62,6 @@ export class UserRepository implements IUserRepository {
                 firebase_uid: firebaseData.firebase_uid,
             } as InsertUser;
 
-            console.log("dataToInsert", dataToInsert);
-
             // Insert new user profile
             const insertResult = await this.dbClient.insert<InsertUser, SelectUser>(this.tableName, dataToInsert);
             if(!insertResult) {
@@ -71,7 +69,6 @@ export class UserRepository implements IUserRepository {
             }
             return insertResult;
         } catch (error) {
-            console.log(error);
             if(error instanceof UserAlreadyExistsError) {
                 throw error;
             }
@@ -90,9 +87,9 @@ export class UserRepository implements IUserRepository {
             
             if (data.email) { updateData.email = data.email; }
 
-            if (data.isPremium) { updateData.is_premium = data.isPremium; }
+            if (data.isPremium != undefined) { updateData.is_premium = data.isPremium; }
 
-            const queryResponse = await this.dbClient.update<UpdateUser, SelectUser>(this.tableName, updateData, "firebase_uid = $1", [firebase_uid]);
+            const queryResponse = await this.dbClient.update<UpdateUser, SelectUser>(this.tableName, updateData, "firebase_uid", [firebase_uid]);
 
             if (queryResponse) {
                 return queryResponse;
@@ -115,15 +112,9 @@ export class UserRepository implements IUserRepository {
                 throw new UserDoesNotExistError();
             }
 
-            const queryResponse = await this.dbClient.delete(this.tableName, "firebase_uid", [firebase_uid]);
+            await this.dbClient.delete(this.tableName, "firebase_uid", [firebase_uid]);
 
-            await userLifestyleRepository.delete(getUser.data.id);
-
-            if (queryResponse) {
-                throw new Error("Error deleting user profile: Failed to execute delete query");
-            } else {
-                throw new Error();
-            }
+            return;
 
         } catch (error) {
             if(error instanceof DatabaseQueryError || error instanceof BaseError) {
