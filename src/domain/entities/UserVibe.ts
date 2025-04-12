@@ -1,4 +1,4 @@
-export class UserViber {
+export class UserVibe {
     constructor(
         public readonly id: string,
         public readonly created_at: Date,

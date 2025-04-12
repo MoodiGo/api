@@ -25,7 +25,7 @@ export class UserWeatherController extends ControllerBase {
             const user = await this.userRepository.get(req.user.uid);
             if(!user.data) return this.sendError(res, new UserDoesNotExistError(), "User not found");
 
-            await this.userWeatherRepository.upsert(user.data, req.body.weather_id);
+            await this.userWeatherRepository.upsert(user.data, req.body);
 
             return this.send(res, 204, "User weather created");
         } catch (error) {

@@ -4,6 +4,7 @@ import { verifyUserToken } from '../middlewares/verifyUserToken';
 import { UserLifestyleController } from '../controllers/UserLifestyleController';
 import { UserWeatherController } from '../controllers/UserWeatherController';
 import { RoutesProtected } from '../routes';
+import { UserVibeController } from '../controllers/UserVibeController';
 
 
 /**
@@ -50,6 +51,12 @@ export const initProtectedRouter = () : Router => {
     router.post(RoutesProtected.USER_WEATHER, async (req: Request, res: Response) => {
         const controller = new UserWeatherController();
         await controller.createUserWeather(req, res);
+    });
+
+    // POST - user-vibe relation
+    router.post(RoutesProtected.USER_VIBE, async (req: Request, res: Response) => {
+        const controller = new UserVibeController();
+        await controller.createUserVibe(req, res);
     });
 
     // GET - user favorites
