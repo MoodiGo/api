@@ -34,6 +34,12 @@ export const initProtectedRouter = () : Router => {
         await userController.deleteUserProfile(req, res);
     });
 
+    // PUT - user lifestyle
+    router.put('/user/lifestyle', async (req: Request, res: Response) => {
+        const userController = new UserController();
+        await userController.updateUserLifestyle(req, res);
+    });
+
     // GET - user favorites
     // POST - user favorites
     // DELETE - user favorites
