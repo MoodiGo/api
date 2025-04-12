@@ -1,11 +1,13 @@
 import { SQLClient } from "../../application/services/database/SQLClient";
+import { DatabaseQueryError, DatabaseUpdateError } from "../../shared/errors/database";
 import { UserAlreadyExistsError } from "../../shared/errors/user";
 import { UserLifestyleAlreadyExistsError } from "../../shared/errors/user_lifestyle";
-import { InsertUser, InsertUserLifestyle, SelectUser, SelectUserLifestyle } from "../../shared/types/db_types";
+import { InsertUser, InsertUserLifestyle, SelectUser, SelectUserLifestyle, UpdateUser } from "../../shared/types/db_types";
 import { Database } from "../../shared/types/supabase";
 import { User } from "../entities/User";
 import { GetUserProfileResponse } from "../use-cases/GetUserProfile";
 import { FirebaseUserData, PostUserProfileRequest } from "../use-cases/PostUserProfile";
+import { PutUserProfileRequest } from "../use-cases/PutUserProfile";
 
 export interface IUserRepository {
     get(uid: string): Promise<GetUserProfileResponse>;
@@ -67,6 +69,34 @@ export class UserRepository implements IUserRepository {
             }
 
             throw new Error("Error creating user profile");
+        }
+    }
+
+    update = async (data: PutUserProfileRequest, firebase_uid: string): Promise<SelectUser> => {
+        try {
+            const updateData = {} as UpdateUser;
+            
+            if (data.name) { updateData.name = data.name; }
+            
+            if (data.lastName) { updateData.last_name = data.lastName; }
+            
+            if (data.email) { updateData.email = data.email; }
+
+            if (data.isPremium) { updateData.is_premium = data.isPremium; }
+
+            const queryResponse = await this.dbClient.update<UpdateUser, SelectUser>(this.tableName, updateData, "firebase_uid = $1", [firebase_uid]);
+
+            if (queryResponse) {
+                return queryResponse;
+            } else {
+                throw new Error("Error updating user profile");
+            }
+
+        } catch (error) {
+            if(error instanceof DatabaseUpdateError) {
+                throw error;
+            }
+            throw new Error("Error updating user profile");
         }
     }
 }

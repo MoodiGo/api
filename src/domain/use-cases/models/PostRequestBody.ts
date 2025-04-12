@@ -1,17 +1,16 @@
+import { IRequestBodySchema } from "./IRequestBodySchema";
+
 export abstract class PostRequestBody<T> {
     static fromJson(json: any): PostRequestBody<any> {
         throw new Error("Method not implemented.");
     }
 
-    static getSchema(): IPostRequestBodySchema {
+    static getSchema(): IRequestBodySchema {
         throw new Error("Method not implemented.");
     }
-}
 
-export interface IPostRequestBodySchema {
-    type: string;
-    properties: {
-        [key: string]: { type: string };
-    };
-    required: string[];
+    static validate(json: any): boolean {
+        throw new Error("Method not implemented.");
+    }
+
 }

@@ -2,16 +2,16 @@ import { userLifestyleRepository, userRepository } from "../../../di";
 import { UserRepository } from "../../../domain/repositories/UserRepository";
 import { FirebaseUserData, PostUserProfileRequest, PostUserProfileResponse } from "../../../domain/use-cases/PostUserProfile";
 import { Request } from 'express';
-import { UserAlreadyExistsError } from "../../../shared/errors/user";
-import { UserLifestyleAlreadyExistsError } from "../../../shared/errors/user_lifestyle";
 import { UserLifestyleRepository } from "../../../domain/repositories/UserLifestyleRepository";
+import { PutUserProfileRequest, PutUserProfileResponse } from "../../../domain/use-cases/PutUserProfile";
+import { ControllerBase } from "./ControllerBase";
 
-export class UserController {
+export class UserController extends ControllerBase {
     private userRepository:UserRepository;
     private userLSRepository:UserLifestyleRepository;
 
     constructor() {
-        console.log("UserController constructor");
+        super();
         this.userRepository = userRepository;
         this.userLSRepository = userLifestyleRepository;
     }
@@ -28,52 +28,52 @@ export class UserController {
         // TODO - substituir pelo uid do token
         this.userRepository.get("9813jhsalknd219paskd").then((result) => {
             if (result.data) {
-                return res.status(200).send({"message": "User found", "user": result.data});
+                return this.send(res, 200, "User found", result.data);
             }   
             else {
-                return res.status(404).send({"message": "User not found"});
+                return this.send(res, 404, "User not found");
             }
         }
         ).catch((err : any) => {
-            return res.status(500).send({"message": "Internal server error"});
+            return this.send(res, 500, "Internal server error", err);
         });
     }
 
     async createUserProfile(req: Request, res: any) {
-        // TODO - Verificar se realmente precisa
-        // if (!req.user) {
-            // return res.status(401).send({"message": "Unauthorized"});
-        // }
-
-        
-
-
         try {
-            // TODO - substituir pelo uid do token
-            if(req.body == null || req.body == undefined 
-                || !(PostUserProfileRequest.fromJson(req.body) instanceof PostUserProfileRequest)){
-                return res.status(406).send({
-                    message: "Invalid request body. Expected structure:",
-                    expected: PostUserProfileRequest.getSchema(),
-                });
+            if(!this.validateBodyPresence(req.body) || !PostUserProfileRequest.validate(req.body)){
+                return this.sendErrorInvalidBody(res, PostUserProfileRequest.getSchema());
             }
 
             const firebaseUserData = new FirebaseUserData(req.user!);
 
             const userAdded = await this.userRepository.create(req.body, firebaseUserData);
             const lsAdded = await this.userLSRepository.create(userAdded)
-            return res.status(200).send({"message": "User created", 
+
+            return this.send(res, 201, "User created", {
+                user: userAdded,
+                lifestyle: lsAdded
+            } as PostUserProfileResponse);
+        } catch (error) {
+            return this.sendError(res, error, "Error creating user profile");
+        }
+    }
+
+    async updateUserProfile(req: Request, res: any) {
+        try {
+            if(!this.validateBodyPresence(req.body) || !PutUserProfileRequest.validate(req.body)){
+                return this.sendErrorInvalidBody(res, PutUserProfileRequest.getSchema());
+            }
+
+            const userUpdated = await this.userRepository.update(req.body, req.user?.uid!);
+
+            return res.status(200).send({"message": "User updated", 
                 data: {
-                    user: userAdded,
-                    lifestyle: lsAdded
-                } as PostUserProfileResponse
+                    user: userUpdated,
+                } as PutUserProfileResponse
             });
         } catch (error) {
-            if(error instanceof UserAlreadyExistsError || error instanceof UserLifestyleAlreadyExistsError) {
-                return res.status(409).send({"message": error.message});
-            }else{
-                return res.status(500).send({"message": "Internal server error"});
-            }
+            return this.sendError(res, error, "Error updating user profile");
         }
     }
 }

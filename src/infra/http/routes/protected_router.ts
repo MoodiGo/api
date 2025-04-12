@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { UserController } from '../controllers/UserController';
 
 
@@ -11,10 +11,13 @@ export const initProtectedRouter = () : Router => {
 
     
     // GET - user profile
-    router.get('/user', (req, res) => new UserController().getUserProfile(req, res));
+    router.get('/user', (req: Request, res: Response) => new UserController().getUserProfile(req, res));
 
     // POST - create profile
-    router.post('/user', (req, res) => new UserController().createUserProfile(req, res));    
+    router.post('/user', async (req: Request, res: Response) => {
+        const userController = new UserController();
+        await userController.createUserProfile(req, res);
+    });    
 
     // GET - user favorites
     // POST - user favorites

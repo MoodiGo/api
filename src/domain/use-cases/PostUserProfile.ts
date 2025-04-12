@@ -47,13 +47,21 @@ export class PostUserProfileRequest implements PostRequestBody<IPostUserProfileR
             required: ["name", "lastName", "birthDate", "isPremium", "termsAccepted", "contactAccepted"],
         };
     }
+
+    static validate(json: any): boolean {
+        try {
+            return this.fromJson(json) instanceof PostUserProfileRequest;
+        } catch (error) {
+            return false;            
+        }
+    }
 }
 
 export interface PostUserProfileResponse {
     user: SelectUser;
     lifestyle: SelectUserLifestyle;
 }
-    
+
 
 export class FirebaseUserData {
     firebase_uid: string;
