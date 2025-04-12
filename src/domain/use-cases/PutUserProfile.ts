@@ -6,12 +6,14 @@ export class PutUserProfileRequest implements PostRequestBody<PutUserProfileRequ
     lastName?: string;
     email?: string;
     isPremium?: boolean;
+    lastLoginAt?: string;
 
-    constructor(name?: string, lastName?: string, email?: string, isPremium?: boolean) {
+    constructor(name?: string, lastName?: string, email?: string, isPremium?: boolean, lastLoginAt?: string) {
         this.name = name;
         this.lastName = lastName;
         this.email = email;
         this.isPremium = isPremium;
+        this.lastLoginAt = lastLoginAt;
     }
     
     static fromJson(json: any): PutUserProfileRequest {
@@ -19,7 +21,8 @@ export class PutUserProfileRequest implements PostRequestBody<PutUserProfileRequ
             json.name,
             json.lastName,
             json.email,
-            json.isPremium
+            json.isPremium,
+            json.lastLoginAt,
         );
     }
 
@@ -31,6 +34,7 @@ export class PutUserProfileRequest implements PostRequestBody<PutUserProfileRequ
                 lastName: { type: "string" },
                 email: { type: "string" },
                 isPremium: { type: "boolean" },
+                lastLoginAt: { type: "string" },
             },
             required: [],
         };

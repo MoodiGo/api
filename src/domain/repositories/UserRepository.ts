@@ -89,6 +89,8 @@ export class UserRepository implements IUserRepository {
 
             if (data.isPremium != undefined) { updateData.is_premium = data.isPremium; }
 
+            if (data.lastLoginAt) { updateData.last_login_at = data.lastLoginAt; }
+
             const queryResponse = await this.dbClient.update<UpdateUser, SelectUser>(this.tableName, updateData, "firebase_uid", [firebase_uid]);
 
             if (queryResponse) {
