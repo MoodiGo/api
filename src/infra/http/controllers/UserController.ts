@@ -45,18 +45,21 @@ export class UserController {
             // return res.status(401).send({"message": "Unauthorized"});
         // }
 
-        // TODO - substituir pelo uid do token
-        if(req.body == null || req.body == undefined 
-            || !(PostUserProfileRequest.fromJson(req.body) instanceof PostUserProfileRequest)){
-            return res.status(406).send({
-                message: "Invalid request body. Expected structure:",
-                expected: PostUserProfileRequest.getSchema(),
-            });
-        }
+        
 
-        const firebaseUserData = new FirebaseUserData(req.user!);
 
         try {
+            // TODO - substituir pelo uid do token
+            if(req.body == null || req.body == undefined 
+                || !(PostUserProfileRequest.fromJson(req.body) instanceof PostUserProfileRequest)){
+                return res.status(406).send({
+                    message: "Invalid request body. Expected structure:",
+                    expected: PostUserProfileRequest.getSchema(),
+                });
+            }
+
+            const firebaseUserData = new FirebaseUserData(req.user!);
+
             const userAdded = await this.userRepository.create(req.body, firebaseUserData);
             const lsAdded = await this.userLSRepository.create(userAdded)
             return res.status(200).send({"message": "User created", 
